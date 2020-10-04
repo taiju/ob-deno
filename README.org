@@ -1,0 +1,31 @@
+#+TITLE: ob-deno
+
+Babel Functions for Javascript/TypeScript with Deno.
+
+ob-deno is based on ob-js.
+(However, there is no session support.)
+
+* Requirements
+
+- [[https://deno.land/][Deno]]
+- [Optional] [[https://github.com/emacs-typescript/typescript.el][typescript.el]]
+
+* Setup
+
+#+begin_src emacs-lisp :results none
+  (require 'ob-deno)
+  ;; optional
+  (add-to-list 'org-src-lang-modes '("deno" . typescript))
+#+end_src
+
+* Usage
+
+#+begin_example
+  ,#+begin_src deno
+  const arr = [1, 2, 3];
+  return arr;
+  ,#+end_src
+#+end_example
+
+#+RESULTS:
+| 1 | 2 | 3 |
