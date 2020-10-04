@@ -14,7 +14,11 @@ ob-deno is based on ob-js.
 
 #+begin_src emacs-lisp :results none
   (require 'ob-deno)
-  ;; optional
+
+  (add-to-list 'org-babel-load-languages '(deno . t))
+  (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
+
+  ;; optional (required the typescript.el)
   (add-to-list 'org-src-lang-modes '("deno" . typescript))
 #+end_src
 
