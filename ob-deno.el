@@ -32,7 +32,8 @@
   "Javascript/TypeScript code to print value of body.")
 
 (defun org-babel-execute:deno (body params)
-  "Execute a block of Javascript/TypeScript code with org-babel.
+  "Execute a block of Javascript/TypeScript code in `BODY' with org-babel.
+You can also specify parameters in `PARAMS'.
 This function is called by `org-babel-execute-src-block'."
   (let* ((no-color-env (getenv "NO_COLOR"))
 	 (ob-deno-cmd (or (cdr (assq :cmd params)) (format "%s run" ob-deno-cmd)))
@@ -81,7 +82,7 @@ specifying a variable of the same value."
     (replace-regexp-in-string "\n" "\\\\n" (format "%S" var))))
 
 (defun org-babel-variable-assignments:deno (params)
-  "Return list of Javascript/TypeScript statements assigning the block's variables."
+  "Return list of Javascript/TypeScript statements assigning the block's variables in PARAMS."
   (mapcar
    (lambda (pair) (format "var %s=%s;"
 			  (car pair) (ob-deno-var-to-deno (cdr pair))))
