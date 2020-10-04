@@ -43,3 +43,12 @@ ob-deno is based on ob-js.
   ,#+RESULTS:
   : [ 1, 2, 3 ]
 #+end_example
+
+#+begin_example
+  ,#+begin_src deno :var foo="bar" baz='("qux")
+  return {foo, baz};
+  ,#+end_src
+
+  ,#+RESULTS:
+  : { foo: "bar", baz: [ "qux" ] }
+#+end_example
