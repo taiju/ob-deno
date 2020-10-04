@@ -31,7 +31,7 @@ ob-deno is based on ob-js.
 #+end_example
 
 #+begin_example
-  ,#+begin_src deno
+  ,#+begin_src deno :results output
   const arr = [1, 2, 3];
   console.log(arr);
   ,#+end_src
