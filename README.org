@@ -25,7 +25,17 @@ ob-deno is based on ob-js.
   const arr = [1, 2, 3];
   return arr;
   ,#+end_src
+
+  ,#+RESULTS:
+  | 1 | 2 | 3 |
 #+end_example
 
-#+RESULTS:
-| 1 | 2 | 3 |
+#+begin_example
+  ,#+begin_src deno
+  const arr = [1, 2, 3];
+  console.log(arr);
+  ,#+end_src
+
+  ,#+RESULTS:
+  : [ 1, 2, 3 ]
+#+end_example
