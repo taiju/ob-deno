@@ -52,3 +52,15 @@ ob-deno is based on ob-js.
   ,#+RESULTS:
   : { foo: "bar", baz: [ "qux" ] }
 #+end_example
+
+#+begin_example
+#+begin_src deno :results output :cmd deno run --allow-net
+  const response = await fetch("https://httpbin.org/get?hello=world");
+  const json = await response.json();
+
+  console.log(json.args);
+#+end_src
+
+#+RESULTS:
+: { hello: "world" }
+#+end_example
