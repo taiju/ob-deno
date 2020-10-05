@@ -64,3 +64,9 @@ ob-deno is based on ob-js.
 #+RESULTS:
 : { hello: "world" }
 #+end_example
+
+* TO DO
+
+** TODO add configuration for the variable prefix (the choices are ~var~, ~let~, ~const~)
+** TODO add dedicated options for permission control (e.g. ~--allow-net~, ~--allow-env~, etc)
+** TODO add dedicated options for subcommands
