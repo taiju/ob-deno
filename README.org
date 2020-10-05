@@ -24,14 +24,14 @@ ob-deno is based on ob-js.
 
 * Customization
 
-~M-x customize-group RET~
+~M-x customize-group ob-deno RET~
 
 - Ob Deno Cmd
 - Ob Deno Variable Prefix
 
 * Usage
 
-The results parametar is default value.
+The results parameter is default value.
 
 #+begin_example
   ,#+begin_src deno
