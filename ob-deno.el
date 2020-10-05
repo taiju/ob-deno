@@ -27,6 +27,14 @@
   :group 'ob-deno
   :type 'string)
 
+(defcustom ob-deno-variable-prefix "const"
+  "Type of variable prefix."
+  :group 'ob-deno
+  :type '(choice (const "const")
+		 (const "let")
+		 (const "var"))
+  :safe #'stringp)
+
 (defvar ob-deno-function-wrapper
   "Deno.stdout.write(new TextEncoder().encode(Deno.inspect((() => {%s})())));"
   "Javascript/TypeScript code to print value of body.")
@@ -106,8 +114,8 @@ specifying a variable of the same value."
 (defun org-babel-variable-assignments:deno (params)
   "Return list of Javascript/TypeScript statements assigning the block's variables in PARAMS."
   (mapcar
-   (lambda (pair) (format "var %s=%s;"
-			  (car pair) (ob-deno-var-to-deno (cdr pair))))
+   (lambda (pair) (format "%s %s=%s;"
+			  ob-deno-variable-prefix (car pair) (ob-deno-var-to-deno (cdr pair))))
    (org-babel--get-vars params)))
 
 (provide 'ob-deno)

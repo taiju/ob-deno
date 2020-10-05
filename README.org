@@ -22,6 +22,13 @@ ob-deno is based on ob-js.
   (add-to-list 'org-src-lang-modes '("deno" . typescript))
 #+end_src
 
+* Customization
+
+~M-x customize-group RET~
+
+- Ob Deno Cmd
+- Ob Deno Variable Prefix
+
 * Usage
 
 The results parametar is default value.
@@ -89,6 +96,6 @@ More complex. (equivalent to ~deno run --allow-net=httpbin.org,example.com --all
 
 * TO DO
 
-** TODO add configuration for the variable prefix (the choices are ~var~, ~let~, ~const~)
+** DONE add configuration for the variable prefix (the choices are ~var~, ~let~, ~const~)
 ** DONE add dedicated options for permission control (e.g. ~--allow-net~, ~--allow-env~, etc)
 ** TODO add dedicated options for subcommands
