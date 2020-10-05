@@ -24,6 +24,8 @@ ob-deno is based on ob-js.
 
 * Usage
 
+The results parametar is default value.
+
 #+begin_example
   ,#+begin_src deno
   const arr = [1, 2, 3];
@@ -33,6 +35,8 @@ ob-deno is based on ob-js.
   ,#+RESULTS:
   | 1 | 2 | 3 |
 #+end_example
+
+The results parameter is output.
 
 #+begin_example
   ,#+begin_src deno :results output
@@ -44,6 +48,8 @@ ob-deno is based on ob-js.
   : [ 1, 2, 3 ]
 #+end_example
 
+Specify variables.
+
 #+begin_example
   ,#+begin_src deno :var foo="bar" baz='("qux")
   return {foo, baz};
@@ -53,8 +59,10 @@ ob-deno is based on ob-js.
   : { foo: "bar", baz: [ "qux" ] }
 #+end_example
 
+Run with ~--allow-net~. (equivalent to ~deno run --allow-net~)
+
 #+begin_example
-  ,#+begin_src deno :results output :cmd deno run --allow-net
+  ,#+begin_src deno :allow net :results output
     const response = await fetch("https://httpbin.org/get?hello=world");
     const json = await response.json();
 
@@ -65,8 +73,22 @@ ob-deno is based on ob-js.
   : { hello: "world" }
 #+end_example
 
+More complex. (equivalent to ~deno run --allow-net=httpbin.org,example.com --allow-env~)
+
+#+begin_example
+  ,#+begin_src deno :allow '((net . (httpbin.org example.com)) env) :results output
+    const response = await fetch(`https://httpbin.org/get?user=${Deno.env.get("USER")}`);
+    const json = await response.json();
+
+    console.log(json.args);
+  ,#+end_src
+
+  ,#+RESULTS:
+  : { user: "taiju" }
+#+end_example
+
 * TO DO
 
 ** TODO add configuration for the variable prefix (the choices are ~var~, ~let~, ~const~)
-** TODO add dedicated options for permission control (e.g. ~--allow-net~, ~--allow-env~, etc)
+** DONE add dedicated options for permission control (e.g. ~--allow-net~, ~--allow-env~, etc)
 ** TODO add dedicated options for subcommands

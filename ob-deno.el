@@ -37,6 +37,8 @@ You can also specify parameters in `PARAMS'.
 This function is called by `org-babel-execute-src-block'."
   (let* ((no-color-env (getenv "NO_COLOR"))
 	 (ob-deno-cmd (or (cdr (assq :cmd params)) (format "%s run" ob-deno-cmd)))
+	 (allow (ob-deno-allow-params (cdr (assq :allow params))))
+	 (ob-deno-cmd-with-permission (concat ob-deno-cmd " " allow))
          (result-type (cdr (assq :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:deno params)))
@@ -49,11 +51,31 @@ This function is called by `org-babel-execute-src-block'."
 			full-body)))
 		   (setenv "NO_COLOR" "true")
 		   (org-babel-eval
-		    (format "%s %s" ob-deno-cmd
+		    (format "%s %s" ob-deno-cmd-with-permission
 			    (org-babel-process-file-name script-file)) ""))))
     (setenv "NO_COLOR" no-color-env)
     (org-babel-result-cond (cdr (assq :result-params params))
       result (ob-deno-read result))))
+
+(defun ob-deno-allow-params (allow-params)
+  "Convert ALLOW-PARAMS to deno's allow-list parameter."
+  (if (listp allow-params)
+      (mapconcat #'ob-deno-allow-param-to-allow-list-str allow-params " ")
+    (ob-deno-format-allow-param allow-params)))
+
+(defun ob-deno-allow-param-to-allow-list-str (allow-param)
+  "Convert ALLOW-PARAM to deno's allow-list parameter string."
+  (if (listp allow-param)
+      (ob-deno-format-allow-param (car allow-param) (cdr allow-param))
+    (ob-deno-format-allow-param allow-param)))
+
+(defun ob-deno-format-allow-param (allow-param &optional values)
+  "Format ALLOW-PARAM to allow-list.
+You can also specify values for the allow-list,
+which can be specified by VALUES."
+  (if values
+      (format "--allow-%s=%s" allow-param (mapconcat #'(lambda (s) (format "%s" s)) values ","))
+    (format "--allow-%s" allow-param)))
 
 (defun ob-deno-read (results)
   "Convert RESULTS into an appropriate elisp value.
