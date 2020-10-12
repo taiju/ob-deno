@@ -82,7 +82,7 @@ This function is called by `org-babel-execute-src-block'."
 You can also specify values for the allow-list,
 which can be specified by VALUES."
   (if values
-      (format "--allow-%s=%s" allow-param (mapconcat #'(lambda (s) (format "%s" s)) values ","))
+      (format "--allow-%s=%s" allow-param (mapconcat (lambda (s) (format "%s" s)) values ","))
     (format "--allow-%s" allow-param)))
 
 (defun ob-deno-read (results)
