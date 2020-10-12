@@ -8,6 +8,8 @@
 ;; Version: 1.0.0
 ;; Package-Requires: ((emacs "26.1"))
 
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; ob-deno is based on ob-js.
