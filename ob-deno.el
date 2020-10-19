@@ -61,7 +61,7 @@ This function is called by `org-babel-execute-src-block'."
          (result-type (cdr (assq :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:deno params)))
-	 (result (let ((script-file (org-babel-temp-file "deno-script-")))
+	 (result (let ((script-file (concat (org-babel-temp-file "deno-script-") ".ts")))
 		   (with-temp-file script-file
 		     (insert
 		      ;; return the value or the output
