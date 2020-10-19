@@ -93,9 +93,3 @@ More complex. (equivalent to ~deno run --allow-net=httpbin.org,example.com --all
   ,#+RESULTS:
   : { user: "taiju" }
 #+end_example
-
-* TO DO
-
-** DONE add configuration for the variable prefix (the choices are ~var~, ~let~, ~const~)
-** DONE add dedicated options for permission control (e.g. ~--allow-net~, ~--allow-env~, etc)
-** TODO add dedicated options for subcommands
