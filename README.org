@@ -24,7 +24,7 @@ ob-deno is based on ob-js.
 
 * Customization
 
-~M-x customize-group ob-deno RET~
+~M-x customize-group RET ob-deno RET~
 
 - Ob Deno Cmd
 - Ob Deno Variable Prefix
