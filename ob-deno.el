@@ -47,7 +47,7 @@
   :safe #'stringp)
 
 (defvar ob-deno-function-wrapper
-  "Deno.stdout.write(new TextEncoder().encode(Deno.inspect((() => {%s})())));"
+  "Deno.stdout.write(new TextEncoder().encode(Deno.inspect(await (async () => {%s})())));"
   "Javascript/TypeScript code to print value of body.")
 
 (defun org-babel-execute:deno (body params)
