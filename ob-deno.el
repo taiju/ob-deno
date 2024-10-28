@@ -42,8 +42,8 @@
   "Type of variable prefix."
   :group 'ob-deno
   :type '(choice (const "const")
-		 (const "let")
-		 (const "var"))
+                 (const "let")
+                 (const "var"))
   :safe #'stringp)
 
 (defcustom ob-deno-function-wrapper
@@ -52,7 +52,7 @@
 %s is replaced with code body, without the imports.  Imports are
  injected to the beginning of the file."
   :group 'ob-deno
-  :type 'string )
+  :type 'string)
 
 (defconst ob-deno--treesit-imports-query
   (treesit-query-compile
@@ -96,25 +96,25 @@ produced code is a valid TypeScript code."
   You can also specify parameters in `PARAMS'.
   This function is called by `org-babel-execute-src-block'."
   (pcase-let* ((no-color-env (getenv "NO_COLOR"))
-	       (ob-deno-cmd (or (cdr (assq :cmd params)) (format "%s run" ob-deno-cmd)))
-	       (allow (ob-deno-allow-params (cdr (assq :allow params))))
-	       (ob-deno-cmd-with-permission (concat ob-deno-cmd " " allow))
+               (ob-deno-cmd (or (cdr (assq :cmd params)) (format "%s run" ob-deno-cmd)))
+               (allow (ob-deno-allow-params (cdr (assq :allow params))))
+               (ob-deno-cmd-with-permission (concat ob-deno-cmd " " allow))
                (result-type (cdr (assq :result-type params)))
                (`(,imports ,rest) (ob-deno--split-imports-and-rest body))
                (result (let ((script-file (concat (org-babel-temp-file "deno-script-") ".ts")))
-	                 (with-temp-file script-file
-	                   (insert
+                         (with-temp-file script-file
+                           (insert
                             (ob-deno--expand-body
                              imports
-	                     ;; return the value or the output
+                             ;; return the value or the output
                              (if (string= result-type "value")
-		                 (format ob-deno-function-wrapper rest)
-	                       rest)
+                                 (format ob-deno-function-wrapper rest)
+                               rest)
                              params)))
-	                 (setenv "NO_COLOR" "true")
-	                 (org-babel-eval
-	                  (format "%s %s" ob-deno-cmd-with-permission
-		                  (org-babel-process-file-name script-file)) ""))))
+                         (setenv "NO_COLOR" "true")
+                         (org-babel-eval
+                          (format "%s %s" ob-deno-cmd-with-permission
+                                  (org-babel-process-file-name script-file)) ""))))
     (setenv "NO_COLOR" no-color-env)
     (org-babel-result-cond (cdr (assq :result-params params))
       result (ob-deno-read result))))
@@ -145,16 +145,16 @@ If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (and (stringp results)
-	    (string-prefix-p "[" results)
-	    (string-suffix-p "]" results))
+            (string-prefix-p "[" results)
+            (string-suffix-p "]" results))
        (org-babel-read
         (concat "'"
                 (replace-regexp-in-string
                  "\\[" "(" (replace-regexp-in-string
                             "\\]" ")" (replace-regexp-in-string
                                        ",[[:space:]]" " "
-				       (replace-regexp-in-string
-					"'" "\"" results))))))
+                                       (replace-regexp-in-string
+                                        "'" "\"" results))))))
      results)))
 
 (defun ob-deno-var-to-deno (var)
