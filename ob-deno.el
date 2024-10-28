@@ -157,19 +157,31 @@ Emacs-lisp table, otherwise return the results as a string."
                                         "'" "\"" results))))))
      results)))
 
-(defun ob-deno-var-to-deno (var)
+(defun ob-deno-var-to-deno (val colnames &optional obj?)
   "Convert VAR into a js/ts variable.
 Convert an elisp value into a string of js/ts source code
 specifying a variable of the same value."
-  (if (listp var)
-      (concat "[" (mapconcat #'ob-deno-var-to-deno var ", ") "]")
-    (replace-regexp-in-string "\n" "\\\\n" (format "%S" var))))
+  (cond
+   ((and (listp val) (not obj?))
+    (concat "[" (mapconcat (lambda (it) (ob-deno-var-to-deno it colnames colnames)) val ", ") "]"))
+   ((and (listp val) obj?)
+    (concat "{ " (s-join ", " (--map-indexed (format "%s: %s" (s-lower-camel-case (nth it-index colnames)) (ob-deno-var-to-deno it nil)) val)) " }"))
+   (:else
+    (replace-regexp-in-string "\n" "\\\\n" (format "%S" val)))))
 
 (defun org-babel-variable-assignments:deno (params)
   "Return list of Javascript/TypeScript statements assigning the block's variables in PARAMS."
   (mapcar
-   (lambda (pair) (format "%s %s = %s;"
-                     ob-deno-variable-prefix (car pair) (ob-deno-var-to-deno (cdr pair))))
+   (lambda (pair)
+     (format
+      "%s %s = %s;"
+      ob-deno-variable-prefix
+      (car pair)
+      (ob-deno-var-to-deno
+       (cdr pair)
+       (org-babel-pick-name
+        (cdr (assq :colname-names params))
+        (car pair)))))
    (org-babel--get-vars params)))
 
 (provide 'ob-deno)
