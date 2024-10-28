@@ -84,7 +84,7 @@
    (org-babel-expand-body:generic
     rest params (org-babel-variable-assignments:deno params))))
 
-(defun org-babel-expand-body:deno (body params var-lines)
+(defun org-babel-expand-body:deno (body params &optional var-lines)
   "Expand BODY with PARAMS.
 This takes care of injecting parameters after the imports so that
 produced code is a valid TypeScript code."
