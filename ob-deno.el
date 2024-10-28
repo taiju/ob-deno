@@ -38,7 +38,7 @@
   :group 'ob-deno
   :type 'string)
 
-(defcustom ob-deno-variable-prefix "const"
+(defcustom ob-deno-variable-prefix "let"
   "Type of variable prefix."
   :group 'ob-deno
   :type '(choice (const "const")
