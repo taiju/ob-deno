@@ -6,7 +6,7 @@
 ;; Keywords: literate programming, reproducible research, javascript, typescript, tools
 ;; Homepage: https://github.com/taiju/ob-deno
 ;; Version: 1.0.1
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "29.1") (s "1.13.0") (dash "2.11.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
