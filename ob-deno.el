@@ -46,32 +46,75 @@
 		 (const "var"))
   :safe #'stringp)
 
-(defvar ob-deno-function-wrapper
+(defcustom ob-deno-function-wrapper
   "Deno.stdout.write(new TextEncoder().encode(Deno.inspect(await (async () => {%s})())));"
-  "Javascript/TypeScript code to print value of body.")
+  "Javascript/TypeScript code to print value of body.
+%s is replaced with code body, without the imports.  Imports are
+ injected to the beginning of the file."
+  :group 'ob-deno
+  :type 'string )
+
+(defconst ob-deno--treesit-imports-query
+  (treesit-query-compile
+   'typescript
+   "[(import_statement) @import]")
+  "Treesit query to find import statements for given typescript code.")
+
+(defun ob-deno--split-imports-and-rest (body)
+  "Split BODY into import statements and the rest of the lines return them."
+  (with-temp-buffer
+    (insert body)
+    (let* ((root-node (treesit-buffer-root-node 'typescript))
+           (imports (mapcar #'cdr (treesit-query-capture root-node ob-deno--treesit-imports-query)))
+           (import-end-pos (if imports (treesit-node-end (car (last imports))) 0)))
+      (list
+       ;; :imports
+       (string-join (--map (treesit-node-text it t) imports) "\n")
+       ;; :rest
+       (save-excursion
+         (goto-char import-end-pos)
+         (buffer-substring-no-properties
+          (point)
+          (point-max)))))))
+
+(defun ob-deno--expand-body (imports rest params)
+  (concat
+   imports
+   "\n\n"
+   (org-babel-expand-body:generic
+    rest params (org-babel-variable-assignments:deno params))))
+
+(defun org-babel-expand-body:deno (body params var-lines)
+  "Expand BODY with PARAMS.
+This takes care of injecting parameters after the imports so that
+produced code is a valid TypeScript code."
+  (pcase-let* ((`(,imports ,rest) (ob-deno--split-imports-and-rest body)))
+    (ob-deno--expand-body imports rest params)))
 
 (defun org-babel-execute:deno (body params)
   "Execute a block of Javascript/TypeScript code in `BODY' with org-babel.
-You can also specify parameters in `PARAMS'.
-This function is called by `org-babel-execute-src-block'."
-  (let* ((no-color-env (getenv "NO_COLOR"))
-	 (ob-deno-cmd (or (cdr (assq :cmd params)) (format "%s run" ob-deno-cmd)))
-	 (allow (ob-deno-allow-params (cdr (assq :allow params))))
-	 (ob-deno-cmd-with-permission (concat ob-deno-cmd " " allow))
-         (result-type (cdr (assq :result-type params)))
-         (full-body (org-babel-expand-body:generic
-		     body params (org-babel-variable-assignments:deno params)))
-	 (result (let ((script-file (concat (org-babel-temp-file "deno-script-") ".ts")))
-		   (with-temp-file script-file
-		     (insert
-		      ;; return the value or the output
-		      (if (string= result-type "value")
-			  (format ob-deno-function-wrapper full-body)
-			full-body)))
-		   (setenv "NO_COLOR" "true")
-		   (org-babel-eval
-		    (format "%s %s" ob-deno-cmd-with-permission
-			    (org-babel-process-file-name script-file)) ""))))
+  You can also specify parameters in `PARAMS'.
+  This function is called by `org-babel-execute-src-block'."
+  (pcase-let* ((no-color-env (getenv "NO_COLOR"))
+	       (ob-deno-cmd (or (cdr (assq :cmd params)) (format "%s run" ob-deno-cmd)))
+	       (allow (ob-deno-allow-params (cdr (assq :allow params))))
+	       (ob-deno-cmd-with-permission (concat ob-deno-cmd " " allow))
+               (result-type (cdr (assq :result-type params)))
+               (`(,imports ,rest) (ob-deno--split-imports-and-rest body))
+               (result (let ((script-file (concat (org-babel-temp-file "deno-script-") ".ts")))
+	                 (with-temp-file script-file
+	                   (insert
+                            (ob-deno--expand-body
+                             imports
+	                     ;; return the value or the output
+                             (if (string= result-type "value")
+		                 (format ob-deno-function-wrapper rest)
+	                       rest)
+                             params)))
+	                 (setenv "NO_COLOR" "true")
+	                 (org-babel-eval
+	                  (format "%s %s" ob-deno-cmd-with-permission
+		                  (org-babel-process-file-name script-file)) ""))))
     (setenv "NO_COLOR" no-color-env)
     (org-babel-result-cond (cdr (assq :result-params params))
       result (ob-deno-read result))))
@@ -125,8 +168,8 @@ specifying a variable of the same value."
 (defun org-babel-variable-assignments:deno (params)
   "Return list of Javascript/TypeScript statements assigning the block's variables in PARAMS."
   (mapcar
-   (lambda (pair) (format "%s %s=%s;"
-			  ob-deno-variable-prefix (car pair) (ob-deno-var-to-deno (cdr pair))))
+   (lambda (pair) (format "%s %s = %s;"
+                     ob-deno-variable-prefix (car pair) (ob-deno-var-to-deno (cdr pair))))
    (org-babel--get-vars params)))
 
 (provide 'ob-deno)
