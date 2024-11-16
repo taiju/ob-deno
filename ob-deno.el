@@ -29,6 +29,8 @@
 
 ;;; Code:
 (require 'ob)
+(require 's)
+(require 'dash)
 
 (defvar org-babel-default-header-args:deno '()
   "Default header arguments for js/ts code blocks.")
