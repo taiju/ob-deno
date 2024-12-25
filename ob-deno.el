@@ -6,7 +6,7 @@
 ;; Keywords: literate programming, reproducible research, javascript, typescript, tools
 ;; Homepage: https://github.com/taiju/ob-deno
 ;; Version: 1.0.1
-;; Package-Requires: ((emacs "29.1") (s "1.13.0") (dash "2.11.0"))
+;; Package-Requires: ((emacs "29.1"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -28,9 +28,9 @@
 ;; - Deno https://deno.land/
 
 ;;; Code:
+
 (require 'ob)
-(require 's)
-(require 'dash)
+(require 'seq)
 
 (defvar org-babel-default-header-args:deno '()
   "Default header arguments for js/ts code blocks.")
@@ -71,7 +71,7 @@
            (import-end-pos (if imports (treesit-node-end (car (last imports))) 0)))
       (list
        ;; :imports
-       (string-join (--map (treesit-node-text it t) imports) "\n")
+       (string-join (mapcar (lambda (it) (treesit-node-text it t)) imports) "\n")
        ;; :rest
        (save-excursion
          (goto-char import-end-pos)
@@ -79,24 +79,40 @@
           (point)
           (point-max)))))))
 
-(defun ob-deno--expand-body (imports rest params)
+(defun ob-deno--expand-body (imports params rest)
+  "Create the full script to run.
+IMPORTS are defined at the top and PARAMS are defined right after them.
+REST is appended to the end."
   (concat
    imports
    "\n\n"
    (org-babel-expand-body:generic
     rest params (org-babel-variable-assignments:deno params))))
 
-(defun org-babel-expand-body:deno (body params &optional var-lines)
+(defun ob-deno--to-lower-camel-case (str)
+  "Convert STR to lower camel case."
+  (let* ((case-fold-search nil)
+         (words (split-string
+                 (replace-regexp-in-string
+                  "\\([a-z]\\)\\([A-Z]\\)" "\\1 \\2" str)
+                 "[^a-zA-Z0-9]+")))
+    (if words
+        (concat (downcase (car words))
+                (mapconcat #'capitalize (cdr words) ""))
+      "")))
+
+(defun org-babel-expand-body:deno (body params &optional _var-lines)
   "Expand BODY with PARAMS.
 This takes care of injecting parameters after the imports so that
 produced code is a valid TypeScript code."
   (pcase-let* ((`(,imports ,rest) (ob-deno--split-imports-and-rest body)))
-    (ob-deno--expand-body imports rest params)))
+    (ob-deno--expand-body imports params rest)))
 
 (defun org-babel-execute:deno (body params)
-  "Execute a block of Javascript/TypeScript code in `BODY' with org-babel.
-  You can also specify parameters in `PARAMS'.
-  This function is called by `org-babel-execute-src-block'."
+  "Execute a block of JS/TS code in `BODY' with org-babel.
+You can also specify parameters in `PARAMS'.
+
+This function is called by `org-babel-execute-src-block'."
   (pcase-let* ((no-color-env (getenv "NO_COLOR"))
                (ob-deno-cmd (or (cdr (assq :cmd params)) (format "%s run" ob-deno-cmd)))
                (allow (ob-deno-allow-params (cdr (assq :allow params))))
@@ -109,10 +125,10 @@ produced code is a valid TypeScript code."
                             (ob-deno--expand-body
                              imports
                              ;; return the value or the output
+                             params
                              (if (string= result-type "value")
                                  (format ob-deno-function-wrapper rest)
-                               rest)
-                             params)))
+                               rest))))
                          (setenv "NO_COLOR" "true")
                          (org-babel-eval
                           (format "%s %s" ob-deno-cmd-with-permission
@@ -160,19 +176,32 @@ Emacs-lisp table, otherwise return the results as a string."
      results)))
 
 (defun ob-deno-var-to-deno (val colnames &optional obj?)
-  "Convert VAR into a js/ts variable.
+  "Convert VAL into a JS/TS variable.
 Convert an elisp value into a string of js/ts source code
-specifying a variable of the same value."
+specifying a variable of the same value.
+
+COLNAMES are the column names from given table, if any.  OBJ? is an
+argument indicating whether VAL should be an object or not."
   (cond
    ((and (listp val) (not obj?))
     (concat "[" (mapconcat (lambda (it) (ob-deno-var-to-deno it colnames colnames)) val ", ") "]"))
    ((and (listp val) obj?)
-    (concat "{ " (s-join ", " (--map-indexed (format "%s: %s" (s-lower-camel-case (nth it-index colnames)) (ob-deno-var-to-deno it nil)) val)) " }"))
+    (concat
+     "{ "
+     (string-join
+      (seq-map-indexed
+       (lambda (it idx)
+         (format "%s: %s"
+                 (ob-deno--to-lower-camel-case (nth idx colnames))
+                 (ob-deno-var-to-deno it nil)))
+       val)
+      ", ")
+     " }"))
    (:else
     (replace-regexp-in-string "\n" "\\\\n" (format "%S" val)))))
 
 (defun org-babel-variable-assignments:deno (params)
-  "Return list of Javascript/TypeScript statements assigning the block's variables in PARAMS."
+  "Return list of JS/TS statements assigning the block's variables in PARAMS."
   (mapcar
    (lambda (pair)
      (format
