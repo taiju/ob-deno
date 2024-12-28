@@ -1,18 +1,20 @@
 ;;; ob-deno.el --- Babel Functions for Javascript/TypeScript with Deno      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2020 HIGASHI Taiju
+;; Copyright (C) 2024 Isa Mert Gurbuz
+;; Copyright (C) 2020-2024 HIGASHI Taiju
 
-;; Author: HIGASHI Taiju
-;; Keywords: literate programming, reproducible research, javascript, typescript, tools
-;; Homepage: https://github.com/taiju/ob-deno
-;; Version: 1.0.1
+;; Author: HIGASHI Taiju (2020-2024), Isa Mert Gurbuz (2024-)
+;; Keywords: literate programming, reproducible research, javascript, typescript, tools, deno
+;; Homepage: https://github.com/isamert/ob-deno
+;; Version: 2.0.1
 ;; Package-Requires: ((emacs "29.1"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;;; Commentary:
 
-;; ob-deno is babel functions for Javascript/TypeScript with Deno.  It's based on ob-js.
+;; ob-deno is babel functions for Javascript/TypeScript with Deno.
+;; It's based on ob-js.
 
 ;; Parameters supported:
 ;;   - :cmd
@@ -33,10 +35,10 @@
 (require 'seq)
 
 (defvar org-babel-default-header-args:deno '()
-  "Default header arguments for js/ts code blocks.")
+  "Default header arguments for JS/TS code blocks.")
 
 (defcustom ob-deno-cmd "deno"
-  "Name of command used to evaluate js/ts blocks."
+  "Name of command used to evaluate JS/TS blocks."
   :group 'ob-deno
   :type 'string)
 
@@ -50,9 +52,9 @@
 
 (defcustom ob-deno-function-wrapper
   "Deno.stdout.write(new TextEncoder().encode(Deno.inspect(await (async () => {%s})())));"
-  "Javascript/TypeScript code to print value of body.
+  "JS/TS code to print value of body.
 %s is replaced with code body, without the imports.  Imports are
- injected to the beginning of the file."
+injected to the beginning of the file."
   :group 'ob-deno
   :type 'string)
 

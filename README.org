@@ -10,7 +10,7 @@ ob-deno is based on ob-js.
 * Requirements
 
 - [[https://deno.land/][Deno]]
-- [Optional] [[https://github.com/emacs-typescript/typescript.el][typescript.el]]
+- Emacs 29.1 or higher (~typescript-ts-mode~ needs to be available)
 
 * Installation
 
@@ -21,13 +21,15 @@ ob-deno can be installed from MELPA.
 * Setup
 
 #+begin_src emacs-lisp :results none
-  (require 'ob-deno)
+(require 'ob-deno)
 
-  (add-to-list 'org-babel-load-languages '(deno . t))
-  (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
+(add-to-list 'org-babel-load-languages '(deno . t))
+(org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
 
-  ;; optional (required the typescript.el)
-  (add-to-list 'org-src-lang-modes '("deno" . typescript))
+;; Optional (to get the proper syntax highlighting in org buffers)
+(add-to-list 'org-src-lang-modes '("deno" . typescript-ts))
+;; Or, if you prefer typescript.el instead of typescript-ts:
+(add-to-list 'org-src-lang-modes '("deno" . typescript))
 #+end_src
 
 * Customization
@@ -146,3 +148,7 @@ It also supports imports and table inputs. You can use ~M-x org-babel-expand-src
   ,#+RESULTS:
   [[file:/tmp/plot.svg]]
 #+end_example
+
+* Acknowledgments
+
+This project was originally created and developed by @taiju in 2020 and transferred to @isamert in 2024.
